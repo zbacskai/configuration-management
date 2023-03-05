@@ -1,0 +1,28 @@
+{
+  "name": "configuration-management",
+  "version": "0.0.1",
+  "description": "A simple configuration management tool for small projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zbacskai/configuration-management.git"
+  },
+  "author": "Zoltan Bacskai",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zbacskai/configuration-management/issues"
+  },
+  "homepage": "https://github.com/zbacskai/configuration-management#readme",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.9.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.29.0"
+  }
+}

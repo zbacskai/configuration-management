@@ -1,0 +1,16 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: configmaster
+      POSTGRES_PASSWORD: nemiskellaz
+      POSTGRES_USER: configmaster
+      PGDATA: /pgdata
+    volumes:
+      - ./pgdata:/pgdata 
+    ports:
+      - "5433:5432"
