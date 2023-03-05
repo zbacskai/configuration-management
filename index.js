@@ -11,19 +11,52 @@ sequelize.authenticate().then(() => {
         console.error('Unable to connect to the database:', err);
     });
 
-const SystemDef = sequelize.define('systemdef', {
-    system_id: { 
-        type: Sequelize.STRING,
-        allowNull: false,
+const Component = sequelize.define('component', 
+    {
+        name: { 
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
     },
-    description: {
-        type: Sequelize.STRING,
-        allowNull: false
+    { 
+        indexes: [
+            {
+                unique: true,
+                fields: ['name']
+            },
+        ],
+    }
+)
+
+const Parameter = sequelize.define('parameter',
+    {
+        name: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
+        value: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        }
     },
-})
+    { 
+        indexes: [
+            {
+                unique: true,
+                fields: ['name', 'componentId']
+            },
+        ],
+    }
+)
+
+Component.hasMany(Parameter)
+Parameter.belongsTo(Component);
 
 // The sync seams to delete the entire db
-// SystemDef.sync({ force: true});
+const modelConf = { alter: true}
+//const modelConf = { force: true}
+Component.sync(modelConf);
+Parameter.sync(modelConf);
 
 app.use(express.json());
 
@@ -31,25 +64,88 @@ app.get('/', (req, res) => {
   res.json({ message: 'Hello World!'})
 })
 
-app.post('/systemdef', async (req, res) => {
+app.post('/component', async (req, res) => {
     try {
-        const newSysDef = new SystemDef(req.body);
-        await newSysDef.save();
+        const newComponent = new Component(req.body);
+        await newComponent.save();
         res.json({ status: "OK" })
     } catch (error) {
         console.log(error)
     }
 })
 
-app.get('/systemdef/:systemId', async (req, res) => {
-    const systemId = req.params.systemId;
+app.get('/component/:componentName', async (req, res) => {
+    const componentName = req.params.componentName;
     try {
-        const sysDef = await SystemDef.findAll({
+        const component = await Component.findOne({
             where: {
-                system_id: systemId
+                name: componentName,
             }
         })
-        res.json({ sysDef })
+        res.json({ component })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+app.get('/components/', async (req, res) => {
+    try {
+        const components = await Component.findAll({})
+        res.json({ components })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+app.post('/parameter/:componentName', async (req, res) => {
+    const componentName = req.params.componentName;
+    console.log(req.body);
+    try {
+        const component = await Component.findOne({
+            where: {
+                name: componentName,
+            }
+        });
+        const newParameter = await component.createParameter(req.body);
+        console.log(newParameter);
+        await newParameter.save();
+        res.json({ status: "OK" })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+app.get('/parameter/:componentName/:parameterName', async (req, res) => {
+    const componentName = req.params.componentName;
+    const parameterName = req.params.parameterName;
+    try {
+        const component = await Component.findOne({
+            where: {
+                name: componentName,
+            }
+        })
+        const parameters = await component.getParameters({
+            where: {
+                name: parameterName
+            }
+        })
+        const parameter = parameters[0];
+        res.json({ parameter })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+app.get('/parameters/:componentName', async (req, res) => {
+    const componentName = req.params.componentName;
+    try {
+        const component = await Component.findOne({
+            where: {
+                name: componentName,
+            }
+        })
+        const parameters = await component.getParameters()
+        res.json({ parameters })
     } catch (error) {
         console.log(error)
     }
